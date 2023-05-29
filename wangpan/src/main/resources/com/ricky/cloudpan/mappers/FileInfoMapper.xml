@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ricky.cloudpan.mappers.FileInfoMapper">
+    <!--    实体映射-->
+    <resultMap id="base_result_map" type="com.ricky.cloudpan.entity.po.FileInfo">
+        <!--文件ID-->
+        <result column="file_id" property="file_id"/>
+        <!--用户ID-->
+        <result column="user_id" property="user_id"/>
+        <!--md5值，第一次上传记录-->
+        <result column="file_md5" property="file_md5"/>
+        <!--父级ID-->
+        <result column="file_pid" property="file_pid"/>
+        <!--文件大小-->
+        <result column="file_size" property="file_size"/>
+        <!--文件名称-->
+        <result column="file_name" property="file_name"/>
+        <!--封面-->
+        <result column="file_cover" property="file_cover"/>
+        <!--文件路径-->
+        <result column="file_path" property="file_path"/>
+        <!--创建时间-->
+        <result column="create_time" property="create_time"/>
+        <!--最后更新时间-->
+        <result column="last_update_time" property="last_update_time"/>
+        <!--0:文件 1:目录-->
+        <result column="folder_type" property="folder_type"/>
+        <!--1:视频 2:音频  3:图片 4:文档 5:其他-->
+        <result column="file_category" property="file_category"/>
+        <!-- 1:视频 2:音频  3:图片 4:pdf 5:doc 6:excel 7:txt 8:code 9:zip 10:其他-->
+        <result column="file_type" property="file_type"/>
+        <!--0:转码中 1转码失败 2:转码成功-->
+        <result column="status" property="status"/>
+        <!--回收站时间-->
+        <result column="recovery_time" property="recovery_time"/>
+        <!--删除标记 0:删除  1:回收站  2:正常-->
+        <result column="del_flag" property="del_flag"/>
+    </resultMap>
+
+    <!-- 通用查询结果列-->
+    <sql id="base_column_list">
+        file_id
+        ,user_id,file_md5,file_pid,file_size,
+        file_name,file_cover,file_path,create_time,last_update_time,
+        folder_type,file_category,file_type,status,recovery_time,
+        del_flag
+    </sql>
+
+    <sql id="base_condition_filed">
+        <if test="query.fileId != null and query.fileId!=''">
+            and file_id = #{query.fileId}
+        </if>
+        <if test="query.userId != null and query.userId!=''">
+            and user_id = #{query.userId}
+        </if>
+        <if test="query.fileMd5 != null and query.fileMd5!=''">
+            and file_md5 = #{query.fileMd5}
+        </if>
+        <if test="query.filePid != null and query.filePid!=''">
+            and file_pid = #{query.filePid}
+        </if>
+        <if test="query.fileSize != null">
+            and file_size = #{query.fileSize}
+        </if>
+        <if test="query.fileName != null and query.fileName!=''">
+            and file_name = #{query.fileName}
+        </if>
+        <if test="query.fileCover != null and query.fileCover!=''">
+            and file_cover = #{query.fileCover}
+        </if>
+        <if test="query.filePath != null and query.filePath!=''">
+            and file_path = #{query.filePath}
+        </if>
+        <if test="query.createTime != null and query.createTime!=''">
+            <![CDATA[ and  create_time=str_to_date(#{query.createTime}, '%Y-%m-%d') ]]>
+        </if>
+        <if test="query.lastUpdateTime != null and query.lastUpdateTime!=''">
+            <![CDATA[ and  last_update_time=str_to_date(#{query.lastUpdateTime}, '%Y-%m-%d') ]]>
+        </if>
+        <if test="query.folderType != null">
+            and folder_type = #{query.folderType}
+        </if>
+        <if test="query.fileCategory != null">
+            and file_category = #{query.fileCategory}
+        </if>
+        <if test="query.fileType != null">
+            and file_type = #{query.fileType}
+        </if>
+        <if test="query.status != null">
+            and status = #{query.status}
+        </if>
+        <if test="query.recoveryTime != null and query.recoveryTime!=''">
+            <![CDATA[ and  recovery_time=str_to_date(#{query.recoveryTime}, '%Y-%m-%d') ]]>
+        </if>
+        <if test="query.delFlag != null">
+            and del_flag = #{query.delFlag}
+        </if>
+        <if test="query.fileIdArray!=null and query.fileIdArray.length>0">
+            and file_id in(<foreach collection="query.fileIdArray" item="item" separator=",">#{item}</foreach>)
+        </if>
+        <if test="query.filePidArray!=null and query.filePidArray.length>0">
+            and file_pid in(<foreach collection="query.filePidArray" item="item" separator=",">#{item}</foreach>)
+        </if>
+        <if test="query.excludeFileIdArray!=null and query.excludeFileIdArray.length>0">
+            and file_id not in(<foreach collection="query.excludeFileIdArray" separator="," item="item">#{item}</foreach>)
+        </if>
+    </sql>
+    <!-- 通用条件列-->
+    <sql id="base_condition">
+        <where>
+            <include refid="base_condition_filed"/>
+        </where>
+    </sql>
+
+    <!-- 通用查询条件列-->
+    <sql id="query_condition">
+        <where>
+            <include refid="base_condition_filed"/>
+            <if test="query.fileIdFuzzy!= null  and query.fileIdFuzzy!=''">
+                and file_id like concat('%', #{query.fileIdFuzzy}, '%')
+            </if>
+            <if test="query.userIdFuzzy!= null  and query.userIdFuzzy!=''">
+                and user_id like concat('%', #{query.userIdFuzzy}, '%')
+            </if>
+            <if test="query.fileMd5Fuzzy!= null  and query.fileMd5Fuzzy!=''">
+                and file_md5 like concat('%', #{query.fileMd5Fuzzy}, '%')
+            </if>
+            <if test="query.filePidFuzzy!= null  and query.filePidFuzzy!=''">
+                and file_pid like concat('%', #{query.filePidFuzzy}, '%')
+            </if>
+            <if test="query.fileNameFuzzy!= null  and query.fileNameFuzzy!=''">
+                and file_name like concat('%', #{query.fileNameFuzzy}, '%')
+            </if>
+            <if test="query.fileCoverFuzzy!= null  and query.fileCoverFuzzy!=''">
+                and file_cover like concat('%', #{query.fileCoverFuzzy}, '%')
+            </if>
+            <if test="query.filePathFuzzy!= null  and query.filePathFuzzy!=''">
+                and file_path like concat('%', #{query.filePathFuzzy}, '%')
+            </if>
+            <if test="query.createTimeStart!= null and query.createTimeStart!=''">
+                <![CDATA[ and  create_time>=str_to_date(#{query.createTimeStart}, '%Y-%m-%d') ]]>
+            </if>
+            <if test="query.createTimeEnd!= null and query.createTimeEnd!=''">
+                <![CDATA[ and  create_time< date_sub(str_to_date(#{query.createTimeEnd},'%Y-%m-%d'),interval -1 day) ]]>
+            </if>
+            <if test="query.lastUpdateTimeStart!= null and query.lastUpdateTimeStart!=''">
+                <![CDATA[ and  last_update_time>=str_to_date(#{query.lastUpdateTimeStart}, '%Y-%m-%d') ]]>
+            </if>
+            <if test="query.lastUpdateTimeEnd!= null and query.lastUpdateTimeEnd!=''">
+                <![CDATA[ and  last_update_time< date_sub(str_to_date(#{query.lastUpdateTimeEnd},'%Y-%m-%d'),interval -1 day) ]]>
+            </if>
+            <if test="query.recoveryTimeStart!= null and query.recoveryTimeStart!=''">
+                <![CDATA[ and  recovery_time>=str_to_date(#{query.recoveryTimeStart}, '%Y-%m-%d') ]]>
+            </if>
+            <if test="query.recoveryTimeEnd!= null and query.recoveryTimeEnd!=''">
+                <![CDATA[ and  recovery_time< date_sub(str_to_date(#{query.recoveryTimeEnd},'%Y-%m-%d'),interval -1 day) ]]>
+            </if>
+            <if test="query.queryExpire!=null and query.queryExpire">
+                <![CDATA[  and recovery_time< date_sub(now(),interval 10 day)]]>
+            </if>
+        </where>
+    </sql>
+    <select id="selectCount" resultType="java.lang.Integer">
+        select count(1) from file_info
+        <include refid="query_condition"/>
+    </select>
+
+    <select id="selectList" resultType="com.ricky.cloudpan.entity.po.FileInfo">
+        select
+        <include refid="base_column_list"/>
+        <if test="query.queryNickName!=null and query.queryNickName">
+            ,(select nick_name from user_info u where u.user_id = f.user_id) nickName
+        </if>
+        from file_info f
+        <include refid="query_condition"/>
+        <if test="query.orderBy!=null">
+            order by ${query.orderBy}
+        </if>
+        <if test="query.simplePage!=null">
+            limit #{query.simplePage.start},#{query.simplePage.end}
+        </if>
+    </select>
+
+    <select id="selectUseSpace" resultType="java.lang.Long">
+       select IFNULL(sum(file_size),0)
+        from file_info
+        where user_id = #{userId}
+    </select>
+
+    <select id="selectByFileIdAndUserId" resultType="com.ricky.cloudpan.entity.po.FileInfo">
+        select
+        <include refid="base_column_list"/>
+        from file_info where file_id=#{fileId} and user_id=#{userId}
+    </select>
+
+    <insert id="insert" parameterType="com.ricky.cloudpan.entity.po.FileInfo">
+        insert into file_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="bean.file_id != null">
+                file_id,
+            </if>
+            <if test="bean.user_id != null">
+                user_id,
+            </if>
+            <if test="bean.file_md5 != null">
+                file_md5,
+            </if>
+            <if test="bean.file_pid != null">
+                file_pid,
+            </if>
+            <if test="bean.file_size != null">
+                file_size,
+            </if>
+            <if test="bean.file_name != null">
+                file_name,
+            </if>
+            <if test="bean.file_cover != null">
+                file_cover,
+            </if>
+            <if test="bean.file_path != null">
+                file_path,
+            </if>
+            <if test="bean.create_time != null">
+                create_time,
+            </if>
+            <if test="bean.last_update_time != null">
+                last_update_time,
+            </if>
+            <if test="bean.folder_type != null">
+                folder_type,
+            </if>
+            <if test="bean.file_category != null">
+                file_category,
+            </if>
+            <if test="bean.file_type != null">
+                file_type,
+            </if>
+            <if test="bean.status != null">
+                status,
+            </if>
+            <if test="bean.recovery_time != null">
+                recovery_time,
+            </if>
+            <if test="bean.del_flag != null">
+                del_flag,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="bean.file_id != null">
+                #{bean.file_id},
+            </if>
+            <if test="bean.user_id != null">
+                #{bean.user_id},
+            </if>
+            <if test="bean.file_md5 != null">
+                #{bean.file_md5},
+            </if>
+            <if test="bean.file_pid != null">
+                #{bean.file_pid},
+            </if>
+            <if test="bean.file_size != null">
+                #{bean.file_size},
+            </if>
+            <if test="bean.file_name != null">
+                #{bean.file_name},
+            </if>
+            <if test="bean.file_cover != null">
+                #{bean.file_cover},
+            </if>
+            <if test="bean.file_path != null">
+                #{bean.file_path},
+            </if>
+            <if test="bean.create_time != null">
+                #{bean.create_time},
+            </if>
+            <if test="bean.last_update_time != null">
+                #{bean.last_update_time},
+            </if>
+            <if test="bean.folder_type != null">
+                #{bean.folder_type},
+            </if>
+            <if test="bean.file_category != null">
+                #{bean.file_category},
+            </if>
+            <if test="bean.file_type != null">
+                #{bean.file_type},
+            </if>
+            <if test="bean.status != null">
+                #{bean.status},
+            </if>
+            <if test="bean.recovery_time != null">
+                #{bean.recovery_time},
+            </if>
+            <if test="bean.del_flag != null">
+                #{bean.del_flag},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateFileStatusWithOldStatus">
+        update file_info
+        <set>
+            <if test="bean.file_md5 != null">
+                file_md5 = #{bean.file_md5},
+            </if>
+            <if test="bean.file_pid != null">
+                file_pid = #{bean.file_pid},
+            </if>
+            <if test="bean.file_size != null">
+                file_size = #{bean.file_size},
+            </if>
+            <if test="bean.file_name != null">
+                file_name = #{bean.file_name},
+            </if>
+            <if test="bean.file_cover != null">
+                file_cover = #{bean.file_cover},
+            </if>
+            <if test="bean.file_path != null">
+                file_path = #{bean.file_path},
+            </if>
+            <if test="bean.create_time != null">
+                create_time = #{bean.create_time},
+            </if>
+            <if test="bean.last_update_time != null">
+                last_update_time = #{bean.last_update_time},
+            </if>
+            <if test="bean.folder_type != null">
+                folder_type = #{bean.folder_type},
+            </if>
+            <if test="bean.file_category != null">
+                file_category = #{bean.file_category},
+            </if>
+            <if test="bean.file_type != null">
+                file_type = #{bean.file_type},
+            </if>
+            <if test="bean.status != null">
+                status = #{bean.status},
+            </if>
+            <if test="bean.recovery_time != null">
+                recovery_time = #{bean.recovery_time},
+            </if>
+            <if test="bean.del_flag != null">
+                del_flag = #{bean.del_flag},
+            </if>
+        </set>
+        where file_id = #{fileId}
+        and user_id = #{userId}
+        and status = #{oldStatus}
+    </update>
+    
+    <update id="updateFileDelFlagBatch" parameterType="com.ricky.cloudpan.entity.po.FileInfo">
+        update file_info
+        <set>
+            <if test="bean.file_md5 != null">
+                file_md5 = #{bean.file_md5},
+            </if>
+            <if test="bean.file_pid != null">
+                file_pid = #{bean.file_pid},
+            </if>
+            <if test="bean.file_size != null">
+                file_size = #{bean.file_size},
+            </if>
+            <if test="bean.file_name != null">
+                file_name = #{bean.file_name},
+            </if>
+            <if test="bean.file_cover != null">
+                file_cover = #{bean.file_cover},
+            </if>
+            <if test="bean.file_path != null">
+                file_path = #{bean.file_path},
+            </if>
+            <if test="bean.create_time != null">
+                create_time = #{bean.create_time},
+            </if>
+            <if test="bean.last_update_time != null">
+                last_update_time = #{bean.last_update_time},
+            </if>
+            <if test="bean.folder_type != null">
+                folder_type = #{bean.folder_type},
+            </if>
+            <if test="bean.file_category != null">
+                file_category = #{bean.file_category},
+            </if>
+            <if test="bean.file_type != null">
+                file_type = #{bean.file_type},
+            </if>
+            <if test="bean.status != null">
+                status = #{bean.status},
+            </if>
+            <if test="bean.recovery_time != null">
+                recovery_time = #{bean.recovery_time},
+            </if>
+            <if test="bean.del_flag != null">
+                del_flag = #{bean.del_flag},
+            </if>
+        </set>
+        where user_id = #{userId}
+        <if test="filePidList!=null">
+            and file_pid in(<foreach collection="filePidList" separator="," item="item">#{item}</foreach>)
+        </if>
+        <if test="fileIdList!=null">
+            and file_id in(<foreach collection="fileIdList" separator="," item="item">#{item}</foreach>)
+        </if>
+        <if test="oldDelFlag!=null">
+            and del_flag = #{oldDelFlag}
+        </if>
+    </update>
+
+    <update id="updateByFileIdAndUserId" parameterType="com.ricky.cloudpan.entity.po.FileInfo">
+        update file_info
+        <set>
+            <if test="bean.file_md5 != null">
+                file_md5 = #{bean.file_md5},
+            </if>
+            <if test="bean.file_pid != null">
+                file_pid = #{bean.file_pid},
+            </if>
+            <if test="bean.file_size != null">
+                file_size = #{bean.file_size},
+            </if>
+            <if test="bean.file_name != null">
+                file_name = #{bean.file_name},
+            </if>
+            <if test="bean.file_cover != null">
+                file_cover = #{bean.file_cover},
+            </if>
+            <if test="bean.file_path != null">
+                file_path = #{bean.file_path},
+            </if>
+            <if test="bean.create_time != null">
+                create_time = #{bean.create_time},
+            </if>
+            <if test="bean.last_update_time != null">
+                last_update_time = #{bean.last_update_time},
+            </if>
+            <if test="bean.folder_type != null">
+                folder_type = #{bean.folder_type},
+            </if>
+            <if test="bean.file_category != null">
+                file_category = #{bean.file_category},
+            </if>
+            <if test="bean.file_type != null">
+                file_type = #{bean.file_type},
+            </if>
+            <if test="bean.status != null">
+                status = #{bean.status},
+            </if>
+            <if test="bean.recovery_time != null">
+                recovery_time = #{bean.recovery_time},
+            </if>
+            <if test="bean.del_flag != null">
+                del_flag = #{bean.del_flag},
+            </if>
+        </set>
+        where file_id=#{fileId} and user_id=#{userId}
+    </update>
+
+    <delete id="delFileBatch">
+        delete from file_info where user_id = #{userId}
+        <if test="filePidList!=null">
+            and file_pid in (<foreach collection="filePidList" separator="," item="item">>#{item}</foreach>)
+        </if>
+        <if test="fileIdList!=null">
+            and file_id in(<foreach collection="fileIdList" separator="," item="item">#{item}</foreach>)
+        </if>
+        <if test="oldDelFlag!=null">
+            and del_flag = #{oldDelFlag}
+        </if>
+    </delete>
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ricky.cloudpan.mappers.EmailCodeMapper">
+    <update id="updateByEmailAndCode" parameterType="com.ricky.cloudpan.entity.po.EmailCode">
+        update emailcode set status = 1
+    </update>
+    <insert id="insert" parameterType="com.ricky.cloudpan.mappers.UserInfoMapper">
+        insert into emailcode values(#{email},#{code},#{create_time},#{status})
+    </insert>
+
+    <update id="disableEmailCode">
+        update emailcode set status = 1 where email = #{email} and status = 0
+    </update>
+
+    <select id="selectByEmailAndCode" resultType="com.ricky.cloudpan.entity.po.EmailCode" >
+        select *
+        from emailcode where email = #{email} and code = #{emailCode}
+    </select>
+
+</mapper>
